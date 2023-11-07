@@ -35,10 +35,10 @@ async function run() {
 
 
         // all jobs api
-        app.get('/jobs', async(req,res)=>{
-           const cursor = jobsCollection.find();
-           const result = await cursor.toArray();
-           res.send(result)
+        app.get('/jobs', async (req, res) => {
+            const cursor = jobsCollection.find();
+            const result = await cursor.toArray();
+            res.send(result)
         })
 
         app.post('/jobs', async (req, res) => {
@@ -52,7 +52,7 @@ async function run() {
 
 
         // applied jobs apis
-        app.post('/appliedJobs', async(req,res)=>{
+        app.post('/appliedJobs', async (req, res) => {
             const appliedJobs = req.body;
             console.log(appliedJobs)
             const result = await appliedJobCollection.insertOne(appliedJobs);
@@ -60,6 +60,18 @@ async function run() {
         })
 
 
+
+        // my jobs apis
+        // app.get('/jobs', async (req, res) => {
+        //     console.log(req.query.email);
+        //     let query = {};
+        //     if(req?.query?.email){
+        //         query = {email: req.query.email}
+        //     }
+        //     const cursor = jobsCollection.find(query);
+        //     const result = await cursor.toArray();
+        //     res.send(result)
+        // })
 
 
 
