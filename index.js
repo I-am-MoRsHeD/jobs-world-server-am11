@@ -31,8 +31,10 @@ async function run() {
 
 
         const jobsCollection = client.db('jobsWorld').collection('AllJobs');
+        const appliedJobCollection = client.db('jobsWorld').collection('AppliedJobs');
 
 
+        // all jobs api
         app.get('/jobs', async(req,res)=>{
            const cursor = jobsCollection.find();
            const result = await cursor.toArray();
@@ -45,6 +47,23 @@ async function run() {
             const result = await jobsCollection.insertOne(jobs);
             res.send(result);
         })
+
+
+
+
+        // applied jobs apis
+        app.post('/appliedJobs', async(req,res)=>{
+            const appliedJobs = req.body;
+            console.log(appliedJobs)
+            const result = await appliedJobCollection.insertOne(appliedJobs);
+            res.send(result);
+        })
+
+
+
+
+
+
 
 
 
