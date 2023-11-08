@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 5000;
@@ -52,6 +52,12 @@ async function run() {
 
 
         // applied jobs apis
+        app.get('/appliedJobs', async(req,res)=>{
+            const result = await appliedJobCollection.find().toArray();
+            res.send(result)
+        })
+
+
         app.post('/appliedJobs', async (req, res) => {
             const appliedJobs = req.body;
             console.log(appliedJobs)
@@ -61,18 +67,40 @@ async function run() {
 
 
 
-        // my jobs apis
-        // app.get('/jobs', async (req, res) => {
-        //     console.log(req.query.email);
-        //     let query = {};
-        //     if(req?.query?.email){
-        //         query = {email: req.query.email}
-        //     }
-        //     const cursor = jobsCollection.find(query);
-        //     const result = await cursor.toArray();
-        //     res.send(result)
-        // })
+        // update jobs api
+        app.patch('/jobs/:id', async (req, res) => {
+            const id = req.params.id;
+            console.log(id)
+            const filter = {_id: new ObjectId(id)};
+            const updatedInfo = req.body;
+            const info = {
+                $set: {
+                    name: updatedInfo.name,
+                    email: updatedInfo.email,
+                    photo: updatedInfo.photo,
+                    description: updatedInfo.description,
+                    deadline: updatedInfo.deadline,
+                    category: updatedInfo.category,
+                    title: updatedInfo.title,
+                    salary_range: updatedInfo.salary_range,
+                    date: updatedInfo.date,
+                    applicants: updatedInfo.applicants
+                }
+            }
+            const result = await jobsCollection.updateOne(filter, info);
+            res.send(result)
 
+        })
+
+
+
+        // delete a job
+        app.delete('/jobs/:id', async(req,res)=>{
+            const id = req.params.id;
+            const query = {_id: new ObjectId(id)};
+            const result = await jobsCollection.deleteOne(query);
+            res.send(result)
+        })
 
 
 
