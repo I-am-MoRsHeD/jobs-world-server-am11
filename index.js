@@ -10,7 +10,8 @@ const port = process.env.PORT || 5000;
 
 app.use(cors({
     origin: [
-        'http://localhost:5173'
+        'http://localhost:5173',
+        'https://jobs-world-client-am11.web.app/'
     ],
     credentials: true
 }));
