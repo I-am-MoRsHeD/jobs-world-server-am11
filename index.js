@@ -1,13 +1,13 @@
 const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 5000;
 
 
-// middleware
 app.use(cors({
     origin: [
         'http://localhost:5173'
@@ -15,7 +15,7 @@ app.use(cors({
     credentials: true
 }));
 app.use(express.json());
-
+app.use(cookieParser());
 
 
 
@@ -30,6 +30,25 @@ const client = new MongoClient(uri, {
         deprecationErrors: true,
     }
 });
+
+
+// middlewares
+const verifyToken = (req, res, next) => {
+    const token = req?.cookies?.token;
+    // console.log('token in the middleware', token);
+    if (!token) {
+        return res.status(401).send({ message: 'Unauthorized access' });
+    }
+    jwt.verify(token, process.env.TOKEN, (err, decoced) => {
+        if (err) {
+            return res.status(401).send({ message: 'Unauthorized access' });
+        }
+        req.user = decoced;
+        next();
+    })
+}
+
+
 
 async function run() {
     try {
@@ -85,7 +104,12 @@ async function run() {
 
 
         // applied jobs apis
-        app.get('/appliedJobs', async (req, res) => {
+        app.get('/appliedJobs', verifyToken, async (req, res) => {
+            const tokenOwner = req?.query?.email;
+            const currentUser = req?.user?.email;
+            if (currentUser !== tokenOwner) {
+                return res.status(403).send({ message: 'forbidden access' });
+            }
             const result = await appliedJobCollection.find().toArray();
             res.send(result)
         })
