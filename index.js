@@ -1,6 +1,5 @@
 const express = require('express');
 const cors = require('cors');
-const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
@@ -8,12 +7,7 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 
-app.use(cors({
-    origin: [
-        'http://localhost:5173'
-    ],
-    credentials: true
-}));
+app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
 
@@ -32,57 +26,15 @@ const client = new MongoClient(uri, {
 });
 
 
-// middlewares
-const verifyToken = (req, res, next) => {
-    const token = req?.cookies?.token;
-    // console.log('token in the middleware', token);
-    if (!token) {
-        return res.status(401).send({ message: 'Unauthorized access' });
-    }
-    jwt.verify(token, process.env.TOKEN, (err, decoced) => {
-        if (err) {
-            return res.status(401).send({ message: 'Unauthorized access' });
-        }
-        req.user = decoced;
-        next();
-    })
-}
-
 
 
 async function run() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
-
+        // await client.connect();
 
         const jobsCollection = client.db('jobsWorld').collection('AllJobs');
         const appliedJobCollection = client.db('jobsWorld').collection('AppliedJobs');
-
-
-        // auth related api
-        app.post('/jwt', async (req, res) => {
-            const user = req.body;
-            console.log('user for token', user);
-            const token = jwt.sign(user, process.env.TOKEN, { expiresIn: '1h' });
-
-            res
-                .cookie('token', token, {
-                    httpOnly: true,
-                    secure: true,
-                    sameSite: 'none'
-                })
-                .send({ success: true });
-        })
-
-        app.post('/logout', async (req, res) => {
-            const user = req.body;
-            console.log('logging out user', user);
-            res
-                .clearCookie('token', {
-                    maxAge: 0
-                })
-                .send({ success: true });
-        })
 
 
 
@@ -104,7 +56,7 @@ async function run() {
 
 
         // applied jobs apis
-        app.get('/appliedJobs', verifyToken, async (req, res) => {
+        app.get('/appliedJobs', async (req, res) => {
             const tokenOwner = req?.query?.email;
             const currentUser = req?.user?.email;
             if (currentUser !== tokenOwner) {
