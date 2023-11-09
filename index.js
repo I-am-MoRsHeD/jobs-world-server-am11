@@ -140,8 +140,7 @@ async function run() {
                     category: updatedInfo.category,
                     title: updatedInfo.title,
                     salary_range: updatedInfo.salary_range,
-                    date: updatedInfo.date,
-                    applicants: updatedInfo.applicants
+                    date: updatedInfo.date
                 }
             }
             const result = await jobsCollection.updateOne(filter, info);
